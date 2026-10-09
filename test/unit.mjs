@@ -44,7 +44,7 @@ test('Config schema accepts defaults and rejects bad types', async () => {
   const parsed = Config({})
   assert.equal(parsed.enabled, true)
   assert.equal(parsed.historyTurns, 4)
-  assert.equal(parsed.maxOutputTokens, 96)
+  assert.equal(parsed.maxOutputTokens, 4096)
   assert.equal(parsed.delayMs, 600)
   assert.throws(() => Config({ historyTurns: 0 }))
   assert.throws(() => Config({ enabled: 'yes' }))
