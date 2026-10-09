@@ -54,7 +54,7 @@ dsh plugin --profile <name> add github:zycFrancis/dsh-prompt-suggestion
 
 | 场景 | 行为 |
 | --- | --- |
-| 回合结束、输入栏为空 | 延迟预生成;Client 轮询拉取,约 0.4–3s 内出现 |
+| 回合结束、输入栏为空 | 延迟预生成;Client 轮询拉取,约 0.4–3s 内出现(实测 deepseek-flash 约 2s) |
 | 按 Tab | ghost 变为真实输入,焦点保留,可直接发送 |
 | 按 Esc | 本次建议关闭,同回合不再出现 |
 | 输入任意字符 / 粘贴 | ghost 消失 |

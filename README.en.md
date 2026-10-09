@@ -54,7 +54,7 @@ Override in the profile's `cordis.patch.yml` (or via the plugin manager):
 
 | Scenario | Behavior |
 | --- | --- |
-| Turn ended, composer empty | Delayed pre-generation; Client polls, appears within ~0.4–3s |
+| Turn ended, composer empty | Delayed pre-generation; Client polls, appears within ~0.4–3s (~2s measured on deepseek-flash) |
 | Press Tab | Ghost becomes real input, focus kept, ready to send |
 | Press Esc | Dismissed for this turn |
 | Type or paste anything | Ghost disappears |
