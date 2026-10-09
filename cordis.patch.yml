@@ -2,4 +2,5 @@
 - insert:
     - id: prompt-suggestion
       name: dsh-prompt-suggestion
-      config: {}
+      config:
+        debugLog: true

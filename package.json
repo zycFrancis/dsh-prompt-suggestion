@@ -83,6 +83,6 @@
     "@deepseek-ai/dsh-typert-loader": "0.2.0-rc.2"
   },
   "scripts": {
-    "test": "node --test test/"
+    "test": "node --test test/unit.mjs test/typert.mjs"
   }
 }

@@ -19,15 +19,18 @@ Claude Code 风格的**输入建议**插件 for [DeepSeek Harness (DSH)](https:/
 
 ## 安装
 
-```bash
-# 方式一:本地路径安装
-dsh plugin install /path/to/dsh-prompt-suggestion
+**方式一:DSH 桌面端 / Web 的 Plugin Manager(推荐)** —— 设置 → Plugins → Install bundle,填入本仓库地址或本地路径。
 
-# 方式二:从 GitHub 安装
-dsh plugin install zycFrancis/dsh-prompt-suggestion
+**方式二:CLI**(pnpm 参数转发形式;`desktop` 档由 Electron 独占管理,请在应用内安装):
+
+```bash
+# 本地路径
+dsh plugin --profile <name> add /path/to/dsh-prompt-suggestion
+# 从 GitHub
+dsh plugin --profile <name> add github:zycFrancis/dsh-prompt-suggestion
 ```
 
-安装后**刷新一次 Web 页面**以加载 Client 模块。新回合结束后即可看到建议。
+安装后**刷新一次 Web 页面**(桌面端 Cmd+R / 重开窗口)以加载 Client 模块。新回合结束后即可看到建议。
 
 ## 配置
 
@@ -44,6 +47,7 @@ dsh plugin install zycFrancis/dsh-prompt-suggestion
     maxInputChars: 6000    # 送入模型的对话文本上限(字符)
     maxOutputTokens: 4096   # 建议请求的 max tokens(思考型模型需容纳思考内容)
     delayMs: 600           # turn/end 后延迟预生成的毫秒数(0 为立即)
+    debugLog: false        # true 时向 /tmp/dsh-prompt-suggestion.log 写诊断日志
 ```
 
 ## 行为细节
@@ -66,7 +70,7 @@ dsh plugin install zycFrancis/dsh-prompt-suggestion
 
 ```bash
 pnpm install
-node --test test/unit.mjs
+node --test test/unit.mjs test/typert.mjs
 ```
 
 - `lib/index.js` — Host 半:事件接线、对话收集、LLM 生成、RPC 服务。

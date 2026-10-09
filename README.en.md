@@ -19,15 +19,18 @@ Claude Code-style **prompt suggestions** for [DeepSeek Harness (DSH)](https://gi
 
 ## Install
 
-```bash
-# Option A: local path
-dsh plugin install /path/to/dsh-prompt-suggestion
+**Option A: Plugin Manager in the DSH desktop app / Web (recommended)** — Settings → Plugins → Install bundle, paste this repo URL or a local path.
 
-# Option B: from GitHub
-dsh plugin install zycFrancis/dsh-prompt-suggestion
+**Option B: CLI** (pnpm-argument passthrough; the `desktop` profile is managed exclusively by the Electron app — install from inside it):
+
+```bash
+# local path
+dsh plugin --profile <name> add /path/to/dsh-prompt-suggestion
+# from GitHub
+dsh plugin --profile <name> add github:zycFrancis/dsh-prompt-suggestion
 ```
 
-Refresh the Web page once after installing so the Client module loads. Suggestions appear after the next completed turn.
+Refresh the page once after installing (desktop: Cmd+R / reopen the window) so the Client module loads. Suggestions appear after the next completed turn.
 
 ## Configuration
 
@@ -44,6 +47,7 @@ Override in the profile's `cordis.patch.yml` (or via the plugin manager):
     maxInputChars: 6000    # character cap for conversation input
     maxOutputTokens: 4096   # max tokens for the suggestion request (thinking models need headroom)
     delayMs: 600           # pre-generation delay after turn/end (0 = immediate)
+    debugLog: false        # write diagnostics to /tmp/dsh-prompt-suggestion.log when true
 ```
 
 ## Behavior details
@@ -66,7 +70,7 @@ Each suggestion costs a few hundred input tokens and a few dozen output tokens o
 
 ```bash
 pnpm install
-node --test test/unit.mjs
+node --test test/unit.mjs test/typert.mjs
 ```
 
 - `lib/index.js` — Host half: event wiring, conversation collection, LLM generation, RPC service.
