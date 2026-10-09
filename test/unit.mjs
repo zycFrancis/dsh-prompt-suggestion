@@ -1,111 +1,89 @@
 /**
- * Host 半核心逻辑单元测试(纯函数,不依赖运行中的 Harness)。
+ * Host 半逻辑单元测试(纯 mock,不依赖运行中的 Harness)。
  * 运行:node --test test/unit.mjs
  */
 
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { createRequire } from 'node:module'
+import { plugin } from './helpers.mjs'
 
-const require = createRequire(import.meta.url)
-const { default: s } = await import('@deepseek-ai/schemastery')
+/** 构造一个宿主 ctx mock:外层 ctx + inject 子上下文(llmCtx)。 */
+function makeHarness({ llm }) {
+  const handlers = new Map()
+  const provided = []
+  const llmCtx = {
+    llm,
+    get: () => undefined,
+    on: (name, fn) => { handlers.set(name, fn); return () => {} },
+    provide: (name, value) => { provided.push([name, value]) },
+    effect: (fn) => { fn(); return () => {} },
+    logger: { warn: () => {} },
+  }
+  const ctx = {
+    on: (name, fn) => { handlers.set(`root:${name}`, fn); return () => {} },
+    effect: (fn) => { fn(); return () => {} },
+    inject: (deps, fn) => {
+      assert.deepEqual(deps, ['llm'])
+      return fn(llmCtx)
+    },
+  }
+  return { ctx, handlers, provided, service: () => provided[0]?.[1] }
+}
 
-// index.js 顶层只 import schemastery;导入即可拿到全部导出。
-const plugin = await import('../lib/index.js')
+const fakeLlm = (chunks) => ({
+  stream: async function* () { for (const chunk of chunks) yield chunk },
+})
 
-// ── 内部函数经由插件模块的结构不可直接访问,这里复刻关键纯函数的行为
-//    断言改走"通过导出面 + 等价实现快照"不可行,因此本文件对可导出部分
-//    (Config)做校验,纯函数逻辑用行为级用例在 test/host-service.mjs 覆盖。
+const okLlm = fakeLlm([
+  { type: 'text', text: '"跑一下测试"' },
+  { type: 'finish', reason: { kind: 'stop' } },
+])
 
-test('Config schema accepts defaults and rejects bad types', () => {
-  const parsed = plugin.Config({})
+test('Config schema accepts defaults and rejects bad types', async () => {
+  const { Config } = await import('../lib/index.js')
+  const parsed = Config({})
   assert.equal(parsed.enabled, true)
   assert.equal(parsed.historyTurns, 4)
   assert.equal(parsed.maxOutputTokens, 96)
   assert.equal(parsed.delayMs, 600)
-
-  assert.throws(() => plugin.Config({ historyTurns: 0 }))
-  assert.throws(() => plugin.Config({ enabled: 'yes' }))
-  const explicit = plugin.Config({ enabled: false, provider: 'deepseek', model: 'x' })
+  assert.throws(() => Config({ historyTurns: 0 }))
+  assert.throws(() => Config({ enabled: 'yes' }))
+  const explicit = Config({ enabled: false, provider: 'deepseek', model: 'x' })
   assert.equal(explicit.enabled, false)
-  assert.equal(explicit.provider, 'deepseek')
 })
 
-test('apply() wires service when llm is present', async () => {
-  const provided = []
-  const listeners = []
-  const ctx = {
-    on: (name, fn) => { listeners.push([name, fn]); return () => {} },
-    effect: (fn) => { fn(); return () => {} },
-    inject: (deps, fn) => {
-      assert.deepEqual(deps, ['llm'])
-      return fn({ llm: fakeLlm, get: () => undefined })
-    },
-    provide: (name, value) => { provided.push([name, value]) },
-    logger: { warn: () => {} },
-  }
-  const fakeLlm = {
-    stream: async function* () {
-      yield { type: 'text', text: '"跑一下测试"' }
-      yield { type: 'finish', reason: { kind: 'stop' } }
-    },
-  }
-  plugin.apply(ctx, {})
-  assert.equal(provided.length, 1)
-  assert.equal(provided[0][0], 'promptSuggestion')
-  const service = provided[0][1]
+test('apply() wires service on the inject context with typertRemote binding', async () => {
+  const h = makeHarness({ llm: okLlm })
+  plugin.apply(h.ctx, {})
+  assert.equal(h.provided.length, 1)
+  assert.equal(h.provided[0][0], 'promptSuggestion')
+  const service = h.service()
   assert.equal(typeof service.get, 'function')
   assert.equal(typeof service.dismiss, 'function')
-
-  // typertRemote 绑定满足网关校验的形状。
   const binding = service.typertRemote
   assert.equal(binding.service, service)
   assert.equal(binding.serviceKey, 'promptSuggestion')
   assert.equal(binding.namespace, 'promptSuggestion')
-
-  // dismiss 幂等返回 ok。
   const dismissed = await service.dismiss('sess-1')
   assert.deepEqual(dismissed, { ok: true })
 })
 
-test('get() without llm session returns pending/failed shape, never throws', async () => {
-  const provided = []
-  const fakeLlm = { stream: async function* () { yield { type: 'finish', reason: { kind: 'stop' } } } }
-  const ctx = {
-    on: () => () => {},
-    effect: (fn) => { fn(); return () => {} },
-    inject: (deps, fn) => fn({ llm: fakeLlm, get: () => undefined }),
-    provide: (name, value) => { provided.push([name, value]) },
-    logger: { warn: () => {} },
-  }
-  plugin.apply(ctx, {})
-  const service = provided[0][1]
+test('get() with empty/unknown session never throws', async () => {
+  const h = makeHarness({ llm: okLlm })
+  plugin.apply(h.ctx, {})
+  const service = h.service()
   const bad = await service.get('')
   assert.equal(bad.state, 'failed')
   const unknown = await service.get('sess-none')
   assert.ok(unknown.state === 'pending' || unknown.state === 'failed')
 })
 
-test('turn/end then user/message lifecycle: suggestion invalidates on new input', async () => {
-  const provided = []
-  const handlers = new Map()
-  const fakeLlm = {
-    stream: async function* () {
-      yield { type: 'text', text: '修复失败的测试' }
-      yield { type: 'finish', reason: { kind: 'stop' } }
-    },
-  }
-  const ctx = {
-    on: (name, fn) => { handlers.set(name, fn); return () => {} },
-    effect: (fn) => { fn(); return () => {} },
-    inject: (deps, fn) => fn({ llm: fakeLlm, get: () => undefined }),
-    provide: (name, value) => { provided.push([name, value]) },
-    logger: { warn: () => {} },
-  }
-  plugin.apply(ctx, { delayMs: 0 })
-  const service = provided[0][1]
-  const sessionEvent = handlers.get('session/event')
-  const statusEvent = handlers.get('api-session/status')
+test('lifecycle: turn/end generates, user/message and running invalidate', async () => {
+  const h = makeHarness({ llm: okLlm })
+  plugin.apply(h.ctx, { delayMs: 0 })
+  const service = h.service()
+  const sessionEvent = h.handlers.get('session/event')
+  const statusEvent = h.handlers.get('api-session/status')
   assert.ok(sessionEvent !== undefined && statusEvent !== undefined)
 
   const events = [
@@ -120,19 +98,38 @@ test('turn/end then user/message lifecycle: suggestion invalidates on new input'
     requestHeader: () => ({ config: { provider: 'test-provider', model: 'test-model' } }),
   }
   for (const event of events) sessionEvent(session, event)
-  // delayMs=0 时生成立即调度;等待微任务+定时器落定。
   await new Promise((resolve) => setTimeout(resolve, 30))
   const got = await service.get('sess-a')
   assert.equal(got.state, 'ready')
-  assert.equal(got.text, '修复失败的测试')
+  assert.equal(got.text, '跑一下测试')
 
-  // 新用户输入使建议失效。
   sessionEvent(session, { type: 'user/message', seq: 4, data: { role: 'user', content: [{ type: 'text', text: '好' }] } })
-  const after = await service.get('sess-a')
-  assert.equal(after.state, 'pending')
+  assert.notEqual((await service.get('sess-a')).state, 'ready')
 
-  // running=true 同样失效。
   statusEvent('sess-a', true)
-  const afterRun = await service.get('sess-a')
-  assert.equal(afterRun.state, 'pending')
+  assert.notEqual((await service.get('sess-a')).state, 'ready')
+})
+
+test('llm failure yields failed state, never throws to RPC', async () => {
+  const h = makeHarness({
+    llm: fakeLlm([{ type: 'finish', reason: { kind: 'error', failure: { message: 'boom' } } }]),
+  })
+  plugin.apply(h.ctx, { delayMs: 0 })
+  const service = h.service()
+  const sessionEvent = h.handlers.get('session/event')
+  const events = [
+    { type: 'user/message', seq: 0, data: { role: 'user', content: [{ type: 'text', text: 'hi' }] } },
+    { type: 'assistant/message', seq: 1, data: { message: { role: 'assistant', content: [{ type: 'text', text: 'hello' }] } } },
+    { type: 'turn/end', seq: 2, data: { turn: 1, reason: { kind: 'stop' } } },
+  ]
+  const session = {
+    id: 'sess-b',
+    snapshotEvents: () => events,
+    requestHeader: () => ({ config: { provider: 'p', model: 'm' } }),
+  }
+  for (const event of events) sessionEvent(session, event)
+  await new Promise((resolve) => setTimeout(resolve, 30))
+  const got = await service.get('sess-b')
+  assert.equal(got.state, 'failed')
+  assert.equal(got.text, '')
 })

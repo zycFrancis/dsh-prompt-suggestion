@@ -34,10 +34,19 @@
     "schemaVersion": 1,
     "displayName": "dsh-prompt-suggestion",
     "summary": "回合结束后在输入栏显示灰色建议(ghost text),Tab 采纳、Esc 关闭,后台 LLM 按最近对话生成。",
-    "categories": ["输入", "Web UI", "效率"],
-    "surfaces": ["host", "web"],
+    "categories": [
+      "输入",
+      "Web UI",
+      "效率"
+    ],
+    "surfaces": [
+      "host",
+      "web"
+    ],
     "capabilities": {
-      "provides": ["service:prompt-suggestion"]
+      "provides": [
+        "service:prompt-suggestion"
+      ]
     },
     "compatibility": {
       "dsh": ">=0.1.0-rc.5",
@@ -69,5 +78,11 @@
     "ghost-text",
     "autocomplete"
   ],
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "@deepseek-ai/dsh-typert-loader": "0.2.0-rc.2"
+  },
+  "scripts": {
+    "test": "node --test test/"
+  }
 }
