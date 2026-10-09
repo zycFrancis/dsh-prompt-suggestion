@@ -10,10 +10,19 @@ Claude Code 风格的**输入建议**插件 for [DeepSeek Harness (DSH)](https:/
 └──────────────────────────────────────────────┘
 ```
 
+## 模型路由:默认跟随当前会话
+
+建议生成**零配置跟随你正在使用的模型**——provider、model 与思考档
+(reasoningEffort)均取自会话最近一次请求:你切到 Kimi,下一条建议就用
+Kimi 生成;用 GLM-5.3 + high 思考,建议同样以 high 思考生成。仅当会话
+未指定思考档时才降为该模型最低档(输出为空时自动降级重试),且建议请求
+独立于对话:不进会话日志、不带工具、输出上限默认 4096。想把建议固定到
+指定路由时,可在配置里显式覆盖(见[配置](#配置))。
+
 ## 工作方式
 
 - **Host 半**监听会话事件:`turn/end` 后延迟数百毫秒,把最近 N 轮 user/assistant 文本交给一次**独立的轻量 LLM 请求**(不进会话日志、不带工具、不占上下文)生成一条简短建议;`user/message` 或会话重新开始运行时,建议立即失效。
-- **Client 半**通过 `conversation.input.overlay` 挂进 composer 卡片,把建议以 React portal 渲染到编辑器内,对齐宿主 placeholder 的定位与字体;ghost 可见时自动隐藏宿主 placeholder,主题完全使用 `--dsw-alias-*` token,明暗主题自适应。
+- **Client 半**通过 `conversation.input.overlay` 挂进 composer 卡片,在自己专属的 overlay DOM 内渲染建议,通过对宿主 placeholder 的只读测量对齐输入文本的位置与字体;ghost 可见时自动隐藏宿主 placeholder,主题完全使用 `--dsw-alias-*` token,明暗主题自适应。
 - **Tab 采纳**在 `keydown` 捕获阶段处理(先于 Lexical keymap),命令菜单(`/`、`@` 候选)打开时自动让位;采纳后调用宿主 `inputActions.setDraft`,焦点留在输入框,回车即发。
 - 跨进程通信走 DSH 的 Typert RPC:Host 提供 `promptSuggestion` 服务(`get`/`dismiss`),Client `$mount` 对应命名空间,与官方插件同一套规范。
 

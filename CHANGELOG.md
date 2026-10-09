@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.2.1 (2026-10-09)
+
+- README(中英)顶部新增"模型路由"章节:说明默认跟随当前会话的 provider/model/思考档机制、独立请求边界与显式覆盖入口
+- 修正 README"工作方式"中过时的渲染描述(1.1.0 起为 overlay 内只读测量定位,非 React portal)
+
 ## 1.2.0 (2026-10-09)
 
 - 建议请求完整跟随当前会话:provider、model 与 reasoningEffort 均取自会话最近一次请求(原先思考档强制最低档)。会话未指定思考档时仍降为该模型最低档,输出为空时自动降级重试;Config 新增可选 reasoningEffort 覆盖项。
