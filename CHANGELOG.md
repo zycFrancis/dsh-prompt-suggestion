@@ -1,5 +1,24 @@
 # Changelog
 
+## 1.1.0 (2026-10-09)
+
+规范合规强化版本:对照 DSH 官方插件开发规范逐项审计后,补齐显示元数据并消除两处渲染灰色地带。
+
+### 新增
+
+- 插件市场显示元数据:`locale/en.json` + `locale/zh.json`(title/description)与 `icon.svg`(933B ghost text 图标),Plugin Manager 卡片、bundle 详情与 Settings inventory 现在显示本地化标题与图标
+
+### 变更
+
+- 样式注入改为 React `<style>` 元素随组件渲染,卸载自动移除(原先 `document.head.append` + 手动清理)
+- ghost 定位改为在插件自己的 overlay DOM 内渲染,通过对宿主 placeholder 的只读测量(getBoundingClientRect + computedStyle)对齐输入文本,窗口 resize 自动重测(原先 React portal 进宿主编辑器容器)
+- 键盘处理收紧作用域:Tab/Esc 只响应 ghost 所在卡片的输入栏
+
+### 验证
+
+- 规范对照 20 项硬性条目 + 2 项原灰色地带全部合规
+- 单元测试 8/8;真实回合回归通过(deepseek-flash,建议语义精准)
+
 ## 1.0.0 (2026-10-09)
 
 首个公开版本:Claude Code 风格的 DSH 输入建议插件。
