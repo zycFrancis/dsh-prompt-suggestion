@@ -93,6 +93,10 @@ node --test test/unit.mjs test/typert.mjs
 
 修改 Host 半代码后重载插件即可;修改 Client 半需要刷新页面。
 
+## 路线图
+
+升级方向与优先级按 GitHub 用户反馈动态调整,见 [ROADMAP](./docs/ROADMAP.md)。
+
 ## License
 
 MIT

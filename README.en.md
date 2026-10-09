@@ -100,6 +100,10 @@ node --test test/unit.mjs test/typert.mjs
 
 Reload the plugin after changing Host code; refresh the page after changing Client code.
 
+## Roadmap
+
+Upgrade directions and priorities are driven by GitHub user feedback — see [ROADMAP](./docs/ROADMAP.md) (Chinese).
+
 ## License
 
 MIT
