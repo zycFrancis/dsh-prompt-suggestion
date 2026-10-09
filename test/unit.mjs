@@ -133,3 +133,32 @@ test('llm failure yields failed state, never throws to RPC', async () => {
   assert.equal(got.state, 'failed')
   assert.equal(got.text, '')
 })
+
+test('reasoning fallback: tailOfReasoning extracts conclusion', async () => {
+  // 模块未导出内部函数;经由行为验证:text 空时,reasoning 尾段成为建议来源。
+  const mod = await import('../lib/index.js')
+  const h = makeHarness({
+    llm: fakeLlm([
+      { type: 'reasoning', text: '先想想…\n再想想…\n最终答案:运行测试并修复' },
+      { type: 'finish', reason: { kind: 'stop' } },
+    ]),
+  })
+  mod.apply(h.ctx, { delayMs: 0 })
+  const service = h.service()
+  const sessionEvent = h.handlers.get('session/event')
+  const events = [
+    { type: 'user/message', seq: 0, data: { role: 'user', content: [{ type: 'text', text: 'hi' }] } },
+    { type: 'assistant/message', seq: 1, data: { message: { role: 'assistant', content: [{ type: 'text', text: 'hello' }] } } },
+    { type: 'turn/end', seq: 2, data: { turn: 1, reason: { kind: 'stop' } } },
+  ]
+  const session = {
+    id: 'sess-c',
+    snapshotEvents: () => events,
+    requestHeader: () => ({ config: { provider: 'p', model: 'm' } }),
+  }
+  for (const event of events) sessionEvent(session, event)
+  await new Promise((resolve) => setTimeout(resolve, 30))
+  const got = await service.get('sess-c')
+  assert.equal(got.state, 'ready')
+  assert.ok(got.text.includes('运行测试'), `text derived from reasoning tail: ${got.text}`)
+})
