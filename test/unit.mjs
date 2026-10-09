@@ -35,7 +35,8 @@ const fakeLlm = (chunks) => ({
 })
 
 const okLlm = fakeLlm([
-  { type: 'text', text: '"跑一下测试"' },
+  { type: 'text-delta', text: '"跑' },
+  { type: 'text-delta', text: '一下测试"' },
   { type: 'finish', reason: { kind: 'stop' } },
 ])
 
@@ -139,7 +140,8 @@ test('reasoning fallback: tailOfReasoning extracts conclusion', async () => {
   const mod = await import('../lib/index.js')
   const h = makeHarness({
     llm: fakeLlm([
-      { type: 'reasoning', text: '先想想…\n再想想…\n最终答案:运行测试并修复' },
+      { type: 'reasoning-delta', text: '先想想…\n再想想…\n最终答案:运行测试并修复' },
+      { type: 'text-delta', text: '' },
       { type: 'finish', reason: { kind: 'stop' } },
     ]),
   })
