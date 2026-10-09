@@ -66,7 +66,8 @@
     "README.en.md",
     "CHANGELOG.md",
     "locale/*.json",
-    "icon.svg"
+    "icon.svg",
+    "docs/*.md"
   ],
   "dependencies": {
     "@deepseek-ai/schemastery": "^3.18.0",
