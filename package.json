@@ -1,0 +1,73 @@
+{
+  "name": "dsh-prompt-suggestion",
+  "version": "0.1.0",
+  "description": "Claude Code 风格的输入建议:回合结束后在输入栏显示灰色 ghost text,按 Tab 采纳为真实输入。Prompt suggestions for DeepSeek Harness: ghost text in the composer after each turn, Tab to accept.",
+  "type": "module",
+  "main": "lib/index.js",
+  "exports": {
+    ".": {
+      "default": "./lib/index.js"
+    },
+    "./client": {
+      "default": "./lib/client.js"
+    },
+    "./typert": {
+      "default": "./lib/typert.host.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web",
+      "immediately": true,
+      "inject": [
+        "@deepseek-ai/dsh-api-remotes",
+        "@deepseek-ai/dsh-client-ui-conversation",
+        "@deepseek-ai/dsh-client-ui-session"
+      ]
+    }
+  },
+  "dshhub": {
+    "schemaVersion": 1,
+    "displayName": "dsh-prompt-suggestion",
+    "summary": "回合结束后在输入栏显示灰色建议(ghost text),Tab 采纳、Esc 关闭,后台 LLM 按最近对话生成。",
+    "categories": ["输入", "Web UI", "效率"],
+    "surfaces": ["host", "web"],
+    "capabilities": {
+      "provides": ["service:prompt-suggestion"]
+    },
+    "compatibility": {
+      "dsh": ">=0.1.0-rc.5",
+      "node": ">=20"
+    },
+    "permissions": {
+      "network": []
+    }
+  },
+  "files": [
+    "lib/index.js",
+    "lib/typert.host.js",
+    "lib/client.js",
+    "cordis.patch.yml",
+    "README.md",
+    "README.en.md"
+  ],
+  "dependencies": {
+    "@deepseek-ai/schemastery": "^3.18.0",
+    "zod": "^4.4.3"
+  },
+  "keywords": [
+    "deepseek",
+    "deepseek-harness",
+    "dsh",
+    "dsh-plugin",
+    "client-plugin",
+    "prompt-suggestion",
+    "ghost-text",
+    "autocomplete"
+  ],
+  "license": "MIT"
+}

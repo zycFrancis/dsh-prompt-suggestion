@@ -1,0 +1,5 @@
+# dsh-prompt-suggestion bundle patch: one host row over the web profile.
+- insert:
+    - id: prompt-suggestion
+      name: dsh-prompt-suggestion
+      config: {}
