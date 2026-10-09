@@ -1,6 +1,6 @@
 # 让建议生成"完整跟随"当前会话:一次 DSH 插件路由设计的演进笔记
 
-> 本文记录 [dsh-prompt-suggestion](https://github.com/zycFrancis/dsh-prompt-suggestion)(Claude Code 风格输入建议插件)中模型路由机制的设计过程:从"模型跟随、参数强制"到"完整跟随",以及这中间踩过的每一个坑。所有结论都有日志或测试背书,希望对写 DSH 插件、尤其是需要发起辅助 LLM 请求(标题生成、摘要、建议)的人有用。
+> 本文记录 [dsh-prompt-suggestion](https://github.com/zycFrancis/dsh-prompt-suggestion)(Claude Code 风格输入建议插件)中模型路由机制的设计过程:从"模型跟随、参数强制"到"完整跟随",以及这中间踩过的每一个坑。所有结论都有日志或测试背书,希望对写 DSH 插件、尤其是需要发起辅助 LLM 请求(标题生成、摘要、建议)的人有用。(English version: [routing-design-notes.en.md](./routing-design-notes.en.md))
 
 ## 1. 问题:同一个模型,两种"性格"
 
