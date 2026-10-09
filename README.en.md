@@ -21,7 +21,7 @@ lowest tier (with an automatic degraded retry on empty output), and the
 suggestion request stays independent of your conversation: never enters the
 session log, no tools, 4096-token output cap by default. To pin suggestions to
 a fixed route, override explicitly in the [configuration](#configuration).
-See the [design notes](./docs/routing-design-notes.md) (Chinese) for the full journey.
+See the [design notes](./docs/routing-design-notes.en.md) for the full journey.
 
 ## How it works
 
