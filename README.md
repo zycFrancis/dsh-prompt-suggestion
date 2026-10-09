@@ -34,18 +34,22 @@ dsh plugin --profile <name> add github:zycFrancis/dsh-prompt-suggestion
 
 ## 配置
 
-安装后在 profile 的 `cordis.patch.yml` 中覆盖(或在 `dsh plugin` 管理页配置):
+**默认零配置**:建议生成完整跟随当前会话——用你正在使用的模型与思考档
+(provider、model、reasoningEffort 均取自会话最近一次请求;会话未指定思考档时
+才降为该模型最低档,输出为空时自动降级重试)。安装后无需任何设置。
+
+仅当需要偏离默认行为时,在 profile 的 `cordis.patch.yml` 覆盖(或在插件管理页配置):
 
 ```yaml
 - id: prompt-suggestion
   name: dsh-prompt-suggestion
   config:
     enabled: true          # 总开关
-    provider: deepseek     # 可选:显式指定生成模型路由
-    model: deepseek-chat   #       省略时依次回退:会话最近一次请求路由 → 全局默认模型
+    # provider/model/reasoningEffort 留空 = 跟随当前会话(推荐);
+    # 仅在想把建议固定到指定路由/思考档时才填写(如固定用便宜模型)。
     historyTurns: 4        # 参与生成的最近回合数
     maxInputChars: 6000    # 送入模型的对话文本上限(字符)
-    maxOutputTokens: 4096   # 建议请求的 max tokens(思考型模型需容纳思考内容)
+    maxOutputTokens: 4096  # 建议请求的 max tokens(思考型模型需容纳思考内容)
     delayMs: 600           # turn/end 后延迟预生成的毫秒数(0 为立即)
     debugLog: false        # true 时向 /tmp/dsh-prompt-suggestion.log 写诊断日志
 ```

@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+- 建议请求完整跟随当前会话:provider、model 与 reasoningEffort 均取自会话最近一次请求(原先思考档强制最低档)。会话未指定思考档时仍降为该模型最低档,输出为空时自动降级重试;Config 新增可选 reasoningEffort 覆盖项。
+- README 配置节重写为"零配置默认跟随"思路:显式 provider/model 降级为可选覆盖,不再作为示例主推。
+
 ## 1.1.0 (2026-10-09)
 
 规范合规强化版本:对照 DSH 官方插件开发规范逐项审计后,补齐显示元数据并消除两处渲染灰色地带。

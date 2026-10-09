@@ -164,3 +164,65 @@ test('reasoning fallback: tailOfReasoning extracts conclusion', async () => {
   assert.equal(got.state, 'ready')
   assert.ok(got.text.includes('运行测试'), `text derived from reasoning tail: ${got.text}`)
 })
+
+test('suggestion request follows the session route including reasoning effort', async () => {
+  const seen = []
+  const llm = {
+    stream: async function* (options) {
+      seen.push(options)
+      yield { type: 'text-delta', text: '跑测试' }
+      yield { type: 'finish', reason: { kind: 'stop' } }
+    },
+    resolveModelInfo: async () => ({ reasoning: { efforts: [{ id: 'low', name: 'Low' }, { id: 'high', name: 'High' }] } }),
+  }
+  const h = makeHarness({ llm })
+  const mod = await import('../lib/index.js')
+  mod.apply(h.ctx, { delayMs: 0 })
+  const sessionEvent = h.handlers.get('session/event')
+  const events = [
+    { type: 'user/message', seq: 0, data: { role: 'user', content: [{ type: 'text', text: 'hi' }] } },
+    { type: 'assistant/message', seq: 1, data: { message: { role: 'assistant', content: [{ type: 'text', text: 'done' }] } } },
+    { type: 'turn/end', seq: 2, data: { turn: 1, reason: { kind: 'stop' } } },
+  ]
+  const session = {
+    id: 'sess-effort',
+    snapshotEvents: () => events,
+    requestHeader: () => ({ config: { provider: 'p', model: 'm', reasoningEffort: 'high' } }),
+  }
+  for (const event of events) sessionEvent(session, event)
+  await new Promise((resolve) => setTimeout(resolve, 30))
+  assert.ok(seen.length >= 1, 'suggestion request issued')
+  assert.equal(seen[0].reasoningEffort, 'high', 'session effort is passed through')
+  assert.equal(seen[0].provider, 'p')
+  assert.equal(seen[0].model, 'm')
+})
+
+test('without session effort the lowest model effort is used', async () => {
+  const seen = []
+  const llm = {
+    stream: async function* (options) {
+      seen.push(options)
+      yield { type: 'text-delta', text: '跑测试' }
+      yield { type: 'finish', reason: { kind: 'stop' } }
+    },
+    resolveModelInfo: async () => ({ reasoning: { efforts: [{ id: 'low', name: 'Low' }, { id: 'high', name: 'High' }] } }),
+  }
+  const h = makeHarness({ llm })
+  const mod = await import('../lib/index.js')
+  mod.apply(h.ctx, { delayMs: 0 })
+  const sessionEvent = h.handlers.get('session/event')
+  const events = [
+    { type: 'user/message', seq: 0, data: { role: 'user', content: [{ type: 'text', text: 'hi' }] } },
+    { type: 'assistant/message', seq: 1, data: { message: { role: 'assistant', content: [{ type: 'text', text: 'done' }] } } },
+    { type: 'turn/end', seq: 2, data: { turn: 1, reason: { kind: 'stop' } } },
+  ]
+  const session = {
+    id: 'sess-noeffort',
+    snapshotEvents: () => events,
+    requestHeader: () => ({ config: { provider: 'p', model: 'm' } }),
+  }
+  for (const event of events) sessionEvent(session, event)
+  await new Promise((resolve) => setTimeout(resolve, 30))
+  assert.ok(seen.length >= 1)
+  assert.equal(seen[0].reasoningEffort, 'low', 'lowest effort resolved when session has none')
+})

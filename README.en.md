@@ -34,15 +34,23 @@ Refresh the page once after installing (desktop: Cmd+R / reopen the window) so t
 
 ## Configuration
 
-Override in the profile's `cordis.patch.yml` (or via the plugin manager):
+**Zero-config by default**: suggestion generation fully follows the current
+session — it uses the model and reasoning effort you are chatting with
+(provider, model and reasoningEffort all come from the session's latest
+request; only when the session specifies no effort does it fall back to the
+model's lowest tier, with an automatic degraded retry on empty output).
+Nothing to set up after installing.
+
+Only override in the profile's `cordis.patch.yml` (or the plugin manager)
+when you want to deviate:
 
 ```yaml
 - id: prompt-suggestion
   name: dsh-prompt-suggestion
   config:
     enabled: true          # master switch
-    provider: deepseek     # optional: explicit model route for generation
-    model: deepseek-chat   #   fallback order: session's last request route → global default model
+    # Leave provider/model/reasoningEffort unset = follow the current session (recommended);
+    # fill them only to pin suggestions to a fixed route/effort (e.g. a cheaper model).
     historyTurns: 4        # recent turns fed to the model
     maxInputChars: 6000    # character cap for conversation input
     maxOutputTokens: 4096   # max tokens for the suggestion request (thinking models need headroom)
@@ -62,7 +70,7 @@ Override in the profile's `cordis.patch.yml` (or via the plugin manager):
 | Command menu open | Tab belongs to the menu; ghost survives after it closes |
 | Switch sessions | Per-session suggestions; still there when you come back (same turn) |
 | No model route available | Fails silently, never affects host features |
-| Thinking models (e.g. GLM-5.3) | Requests the lowest reasoning effort; 4096-token output headroom by default |
+| Thinking models (e.g. GLM-5.3) | Effort follows the current session; falls back to the lowest tier, with degraded retry on empty output |
 
 Each suggestion costs a few hundred input tokens and a few dozen output tokens on the configured route. Set `enabled: false` or uninstall if you do not want that.
 
