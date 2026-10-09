@@ -1,6 +1,6 @@
 {
   "name": "dsh-prompt-suggestion",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Claude Code 风格的输入建议:回合结束后在输入栏显示灰色 ghost text,按 Tab 采纳为真实输入。Prompt suggestions for DeepSeek Harness: ghost text in the composer after each turn, Tab to accept.",
   "type": "module",
   "main": "lib/index.js",
