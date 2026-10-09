@@ -42,7 +42,7 @@ Override in the profile's `cordis.patch.yml` (or via the plugin manager):
     model: deepseek-chat   #   fallback order: session's last request route → global default model
     historyTurns: 4        # recent turns fed to the model
     maxInputChars: 6000    # character cap for conversation input
-    maxOutputTokens: 96    # max tokens for the suggestion request
+    maxOutputTokens: 4096   # max tokens for the suggestion request (thinking models need headroom)
     delayMs: 600           # pre-generation delay after turn/end (0 = immediate)
 ```
 
@@ -58,6 +58,7 @@ Override in the profile's `cordis.patch.yml` (or via the plugin manager):
 | Command menu open | Tab belongs to the menu; ghost survives after it closes |
 | Switch sessions | Per-session suggestions; still there when you come back (same turn) |
 | No model route available | Fails silently, never affects host features |
+| Thinking models (e.g. GLM-5.3) | Requests the lowest reasoning effort; 4096-token output headroom by default |
 
 Each suggestion costs a few hundred input tokens and a few dozen output tokens on the configured route. Set `enabled: false` or uninstall if you do not want that.
 

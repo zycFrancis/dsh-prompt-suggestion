@@ -42,7 +42,7 @@ dsh plugin install zycFrancis/dsh-prompt-suggestion
     model: deepseek-chat   #       省略时依次回退:会话最近一次请求路由 → 全局默认模型
     historyTurns: 4        # 参与生成的最近回合数
     maxInputChars: 6000    # 送入模型的对话文本上限(字符)
-    maxOutputTokens: 96    # 建议请求的 max tokens
+    maxOutputTokens: 4096   # 建议请求的 max tokens(思考型模型需容纳思考内容)
     delayMs: 600           # turn/end 后延迟预生成的毫秒数(0 为立即)
 ```
 
@@ -58,6 +58,7 @@ dsh plugin install zycFrancis/dsh-prompt-suggestion
 | 命令菜单打开 | Tab 归菜单;菜单关闭后 ghost 仍在 |
 | 切换会话 | 各会话建议独立;返回时仍在(本回合内) |
 | 无可用模型路由 | 静默失败,不影响任何宿主功能 |
+| 思考型模型(如 GLM-5.3) | 自动请求最低推理档,输出上限默认 4096 容纳思考 |
 
 建议生成消耗对应模型路由的少量 token(每次约几百 token 输入、几十 token 输出);不想要时设 `enabled: false` 或卸载。
 
