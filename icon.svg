@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <!-- 输入栏卡片 -->
+  <rect x="6" y="18" width="52" height="28" rx="8" fill="none" stroke="currentColor" stroke-width="3" opacity="0.55"/>
+  <!-- 实际输入的光标 -->
+  <rect x="14" y="26" width="3" height="12" rx="1" fill="currentColor"/>
+  <!-- ghost text(虚线示意建议文字) -->
+  <line x1="22" y1="32" x2="34" y2="32" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-dasharray="2 4" opacity="0.45"/>
+  <line x1="38" y1="32" x2="44" y2="32" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-dasharray="2 4" opacity="0.3"/>
+  <!-- Tab 键帽 -->
+  <rect x="42" y="40" width="16" height="14" rx="3" fill="currentColor" opacity="0.85"/>
+  <text x="50" y="51" font-family="-apple-system, Inter, sans-serif" font-size="9" font-weight="600" fill="#ffffff" text-anchor="middle">Tab</text>
+</svg>

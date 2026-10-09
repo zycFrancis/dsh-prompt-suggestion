@@ -14,7 +14,8 @@
     "./typert": {
       "default": "./lib/typert.host.js"
     },
-    "./package.json": "./package.json"
+    "./package.json": "./package.json",
+    "./locale/*.json": "./locale/*.json"
   },
   "dsh": {
     "bundle": {
@@ -63,7 +64,9 @@
     "cordis.patch.yml",
     "README.md",
     "README.en.md",
-    "CHANGELOG.md"
+    "CHANGELOG.md",
+    "locale/*.json",
+    "icon.svg"
   ],
   "dependencies": {
     "@deepseek-ai/schemastery": "^3.18.0",
@@ -85,5 +88,6 @@
   },
   "scripts": {
     "test": "node --test test/unit.mjs test/typert.mjs"
-  }
+  },
+  "icon": "./icon.svg"
 }
